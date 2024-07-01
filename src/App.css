@@ -14,7 +14,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 5px;
   padding: 10px;
 }
 
@@ -22,7 +22,7 @@
   position: relative;
   width: 100%;
   max-width: 2000px;
-  height: 75vh; /* Increased height to 70vh */
+  height: 72vh; /* Increased height to 70vh */
   background-color: black;
   display: flex;
   justify-content: center;
@@ -48,12 +48,12 @@
 .footer {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 @media (max-width: 768px) {
   .video-container {
-    height: 75vh; /* Adjusted height for smaller screens */
+    height: 72vh; /* Adjusted height for smaller screens */
   }
 
   .controls button {
