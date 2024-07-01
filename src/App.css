@@ -16,7 +16,7 @@
 .video-container {
   position: relative;
   width: 100%;
-  max-width:2000px;
+  max-width: 2000px;
   height: 75vh;
   background-color: black;
 }
@@ -33,11 +33,7 @@
 }
 
 .footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  padding: 10px;
-  background-color: #f8f9fa;
-  text-align: center;
+align-items: center;
+margin-top: 10px;
 }
 
