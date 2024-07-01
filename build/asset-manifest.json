@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ourjourney/static/css/main.81f0faec.css",
-    "main.js": "/ourjourney/static/js/main.68a5fb79.js",
+    "main.css": "/ourjourney/static/css/main.c592bad2.css",
+    "main.js": "/ourjourney/static/js/main.cac65237.js",
     "static/js/453.04736a33.chunk.js": "/ourjourney/static/js/453.04736a33.chunk.js",
     "index.html": "/ourjourney/index.html",
-    "main.81f0faec.css.map": "/ourjourney/static/css/main.81f0faec.css.map",
-    "main.68a5fb79.js.map": "/ourjourney/static/js/main.68a5fb79.js.map",
+    "main.c592bad2.css.map": "/ourjourney/static/css/main.c592bad2.css.map",
+    "main.cac65237.js.map": "/ourjourney/static/js/main.cac65237.js.map",
     "453.04736a33.chunk.js.map": "/ourjourney/static/js/453.04736a33.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.81f0faec.css",
-    "static/js/main.68a5fb79.js"
+    "static/css/main.c592bad2.css",
+    "static/js/main.cac65237.js"
   ]
 }

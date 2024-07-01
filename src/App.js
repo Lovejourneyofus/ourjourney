@@ -121,8 +121,8 @@ function App() {
     <div className="App">
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <a className="navbar-brand" href="#">
-          <img src="https://logo.com/image-cdn/images/kts928pd/production/8c9ebd798c2795e587e403a910525115467b1290-731x731.png?w=512&q=72&fm=webp" width="30" height="30" alt="Logo" />
-          Video App
+          <img src="https://logo.com/image-cdn/images/kts928pd/production/8c9ebd798c2795e587e403a910525115467b1290-731x731.png?w=512&q=72&fm=webp" width="80" height="50" alt="Logo" />
+          
         </a>
         {isAuthenticated && (
           <button onClick={logout} id="logout" className="btn btn-secondary ml-auto">Logout</button>
