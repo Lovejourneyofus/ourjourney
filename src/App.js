@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { storage, auth, provider } from "./firebase";
+import { storage, auth, provider, db } from "./firebase";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [videos, setVideos] = useState([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [title, setTitle] = useState("");
   const videoRef = useRef(null);
+  const [uploadFile, setUploadFile] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -29,12 +32,10 @@ function App() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const videoRef = ref(storage, "images/");
-        const videoSnapshot = await listAll(videoRef);
-        const videoUrls = await Promise.all(
-          videoSnapshot.items.map((item) => getDownloadURL(item))
-        );
-        setVideos(videoUrls);
+        const videosCollection = collection(db, "videos");
+        const videoSnapshot = await getDocs(videosCollection);
+        const videoData = videoSnapshot.docs.map(doc => doc.data());
+        setVideos(videoData);
       } catch (error) {
         console.error("Error fetching videos:", error);
       }
@@ -69,9 +70,27 @@ function App() {
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = videos[currentVideoIndex];
-    link.download = videos[currentVideoIndex].split('/').pop();
+    link.href = videos[currentVideoIndex].url;
+    link.download = videos[currentVideoIndex].url.split('/').pop();
     link.click();
+  };
+
+  const handleUpload = async () => {
+    if (uploadFile && title) {
+      const storageRef = ref(storage, `videos/${uploadFile.name}`);
+      await uploadBytes(storageRef, uploadFile);
+      const url = await getDownloadURL(storageRef);
+      await addDoc(collection(db, "videos"), {
+        title: title,
+        url: url,
+        timestamp: new Date()
+      });
+      setUploadFile(null);
+      setTitle("");
+      alert("Video uploaded successfully!");
+    } else {
+      alert("Please provide a title and select a file to upload.");
+    }
   };
 
   useEffect(() => {
@@ -85,17 +104,44 @@ function App() {
 
   return (
     <div className="App">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <a className="navbar-brand" href="#">
+          <img src="logo.png" width="30" height="30" alt="Logo" />
+          Video App
+        </a>
+      </nav>
+
       {!isAuthenticated ? (
         <button onClick={login} className="btn btn-primary login-btn">Login with Google</button>
       ) : (
         <>
+          {isAdmin && (
+            <div className="upload-section">
+              <h3>Upload Video</h3>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title"
+                className="form-control mb-2"
+              />
+              <input
+                type="file"
+                onChange={(e) => setUploadFile(e.target.files[0])}
+                className="form-control mb-2"
+              />
+              <button onClick={handleUpload} className="btn btn-success">Upload</button>
+            </div>
+          )}
           <div className="video-section">
             {videos.length > 0 && (
               <>
                 <div className="video-container">
+                  <h4>{videos[currentVideoIndex].title}</h4>
+                  <small>{new Date(videos[currentVideoIndex].timestamp.seconds * 1000).toLocaleString()}</small>
                   <video
                     ref={videoRef}
-                    src={videos[currentVideoIndex]}
+                    src={videos[currentVideoIndex].url}
                     controls
                     className="video-player"
                     autoPlay
