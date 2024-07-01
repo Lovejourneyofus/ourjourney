@@ -33,7 +33,10 @@
 }
 
 .footer {
-align-items: center;
-margin-top: 10px;
+  align-items: center;
+  margin-top: 10px;
 }
 
+.navbar .btn-secondary {
+  margin-left: auto;
+}

@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { storage, auth, provider, db } from "./firebase";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
-import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, listAll } from "firebase/storage";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function App() {
@@ -12,8 +12,9 @@ function App() {
   const [videos, setVideos] = useState([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [title, setTitle] = useState("");
-  const videoRef = useRef(null);
   const [uploadFile, setUploadFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -75,19 +76,33 @@ function App() {
     link.click();
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (uploadFile && title) {
       const storageRef = ref(storage, `videos/${uploadFile.name}`);
-      await uploadBytes(storageRef, uploadFile);
-      const url = await getDownloadURL(storageRef);
-      await addDoc(collection(db, "videos"), {
-        title: title,
-        url: url,
-        timestamp: new Date()
-      });
-      setUploadFile(null);
-      setTitle("");
-      alert("Video uploaded successfully!");
+      const uploadTask = uploadBytesResumable(storageRef, uploadFile);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error("Error uploading file:", error);
+        },
+        async () => {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          await addDoc(collection(db, "videos"), {
+            title: title,
+            url: url,
+            timestamp: new Date()
+          });
+          setUploadFile(null);
+          setTitle("");
+          setUploadProgress(0);
+          alert("Video uploaded successfully!");
+        }
+      );
     } else {
       alert("Please provide a title and select a file to upload.");
     }
@@ -106,9 +121,12 @@ function App() {
     <div className="App">
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <a className="navbar-brand" href="#">
-          <img src="logo.png" width="30" height="30" alt="Logo" />
+          <img src="https://logo.com/image-cdn/images/kts928pd/production/8c9ebd798c2795e587e403a910525115467b1290-731x731.png?w=512&q=72&fm=webp" width="30" height="30" alt="Logo" />
           Video App
         </a>
+        {isAuthenticated && (
+          <button onClick={logout} id="logout" className="btn btn-secondary ml-auto">Logout</button>
+        )}
       </nav>
 
       {!isAuthenticated ? (
@@ -131,24 +149,37 @@ function App() {
                 className="form-control mb-2"
               />
               <button onClick={handleUpload} className="btn btn-success">Upload</button>
+              {uploadProgress > 0 && (
+                <div className="progress mt-2">
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    style={{ width: `${uploadProgress}%` }}
+                    aria-valuenow={uploadProgress}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    {Math.round(uploadProgress)}%
+                  </div>
+                </div>
+              )}
             </div>
           )}
-          <div className="video-section">
+
+          <div className="video-section mt-4">
             {videos.length > 0 && (
               <>
-                <div className="video-container">
-                  <h4>{videos[currentVideoIndex].title}</h4>
-                  <small>{new Date(videos[currentVideoIndex].timestamp.seconds * 1000).toLocaleString()}</small>
-                  <video
-                    ref={videoRef}
-                    src={videos[currentVideoIndex].url}
-                    controls
-                    className="video-player"
-                    autoPlay
-                    muted={false}
-                  />
-                </div>
-                <div className="controls">
+                <h4>{videos[currentVideoIndex].title}</h4>
+                <video
+                  ref={videoRef}
+                  src={videos[currentVideoIndex].url}
+                  controls
+                  className="video-player my-3"
+                  autoPlay
+                  muted={false}
+                />
+                <small>{new Date(videos[currentVideoIndex].timestamp.seconds * 1000).toLocaleString()}</small>
+                <div className="controls mt-3">
                   <button onClick={handlePrevious} className="btn btn-info mx-2">Previous</button>
                   <button onClick={handleDownload} className="btn btn-warning mx-2">Download</button>
                   <button onClick={handleNext} className="btn btn-info mx-2">Next</button>
@@ -156,9 +187,6 @@ function App() {
               </>
             )}
           </div>
-          <footer className="footer">
-            <button onClick={logout} className="btn btn-secondary logout-btn">Logout</button>
-          </footer>
         </>
       )}
     </div>
