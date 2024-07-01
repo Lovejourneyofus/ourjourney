@@ -20,7 +20,7 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
-        setIsAdmin(user.email === "epsilonclasher12@gmail.com");
+        setIsAdmin(user.email === ("epsilonclasher12@gmail.com") || "poohmm2029@gmail.com");
       } else {
         setIsAuthenticated(false);
         setIsAdmin(false);
