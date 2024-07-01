@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { storage, auth, provider, db } from "./firebase";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
-import { ref, uploadBytesResumable, getDownloadURL, listAll } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function App() {
@@ -101,6 +101,9 @@ function App() {
           setTitle("");
           setUploadProgress(0);
           alert("Video uploaded successfully!");
+          const videoSnapshot = await getDocs(collection(db, "videos"));
+          const videoData = videoSnapshot.docs.map(doc => doc.data());
+          setVideos(videoData);
         }
       );
     } else {
@@ -119,16 +122,6 @@ function App() {
 
   return (
     <div className="App">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <a className="navbar-brand" href="#">
-          <img src="https://logo.com/image-cdn/images/kts928pd/production/8c9ebd798c2795e587e403a910525115467b1290-731x731.png?w=512&q=72&fm=webp" width="80" height="50" alt="Logo" />
-          
-        </a>
-        {isAuthenticated && (
-          <button onClick={logout} id="logout" className="btn btn-secondary ml-auto">Logout</button>
-        )}
-      </nav>
-
       {!isAuthenticated ? (
         <button onClick={login} className="btn btn-primary login-btn">Login with Google</button>
       ) : (
@@ -170,14 +163,16 @@ function App() {
             {videos.length > 0 && (
               <>
                 <h4>{videos[currentVideoIndex].title}</h4>
-                <video
-                  ref={videoRef}
-                  src={videos[currentVideoIndex].url}
-                  controls
-                  className="video-player my-3"
-                  autoPlay
-                  muted={false}
-                />
+                <div className="video-container">
+                  <video
+                    ref={videoRef}
+                    src={videos[currentVideoIndex].url}
+                    controls
+                    className="video-player"
+                    autoPlay
+                    muted={false}
+                  />
+                </div>
                 <small>{new Date(videos[currentVideoIndex].timestamp.seconds * 1000).toLocaleString()}</small>
                 <div className="controls mt-3">
                   <button onClick={handlePrevious} className="btn btn-info mx-2">Previous</button>
@@ -187,6 +182,9 @@ function App() {
               </>
             )}
           </div>
+          <footer className="footer">
+            <button onClick={logout} className="btn btn-secondary">Logout</button>
+          </footer>
         </>
       )}
     </div>
