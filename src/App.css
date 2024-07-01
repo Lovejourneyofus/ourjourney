@@ -22,7 +22,7 @@
   position: relative;
   width: 100%;
   max-width: 2000px;
-  height: 72vh; /* Increased height to 70vh */
+  height: 89vh; /* Increased height to 70vh */
   background-color: black;
   display: flex;
   justify-content: center;
@@ -53,7 +53,7 @@
 
 @media (max-width: 768px) {
   .video-container {
-    height: 50vh; /* Adjusted height for smaller screens */
+    height: 89vh; /* Adjusted height for smaller screens */
   }
 
   .controls button {
